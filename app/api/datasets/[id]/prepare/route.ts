@@ -1,5 +1,7 @@
 import { getWaipBaseUrl, waipHeaders } from "@/lib/waip";
 
+export const maxDuration = 600;
+
 export async function POST(
   _req: Request,
   ctx: { params: Promise<{ id: string }> },

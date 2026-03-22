@@ -154,6 +154,7 @@ export default function Home() {
           question: q,
           return_sources: true,
           receipt_format: receiptFormat,
+          top_k: 24,
         }),
       });
       const data = await res.json();
@@ -305,9 +306,11 @@ export default function Home() {
               </button>
             </div>
             <p className="text-xs text-zinc-600">
-              Large books can take several minutes to index. If a query fails
-              with a &quot;collection not found&quot; error, wait and try again
-              after Prepare shows completion in WAIP.
+              Large books can take many minutes to upload and index. If ingest
+              returns 500 or times out, try one PDF at a time or a smaller file,
+              then run Prepare again—check the technical log for WAIP’s error
+              text. After Prepare finishes, wait before querying if you saw
+              &quot;collection not found&quot; before.
             </p>
           </form>
         </Collapsible>

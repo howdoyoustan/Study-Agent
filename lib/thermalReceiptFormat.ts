@@ -28,6 +28,7 @@ export const THERMAL_RECEIPT_FORMAT_PROMPT = `You are a helpful assistant. Forma
 - Use "* " for bullet points
 - Use "1. ", "2. " etc. for numbered steps
 - Indent sub-items with 2 spaces
+- Each bullet must be substantive: at least one full sentence (or two short sentences) per point when sources allow—not a single word or label
 
 ## EMPHASIS
 - Use *asterisks* around important words (do not use bold/italic markdown)

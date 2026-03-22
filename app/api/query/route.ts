@@ -14,6 +14,8 @@ export async function POST(req: Request) {
       return_sources?: boolean;
       max_output_tokens?: number;
       model_name?: string;
+      /** More retrieved chunks (broader multi-document context). WAIP may cap this. */
+      top_k?: number;
       /** When true (default for question-only requests), prepend thermal receipt rules. */
       receipt_format?: boolean;
     };
@@ -62,6 +64,11 @@ export async function POST(req: Request) {
       ? body.receipt_format === true
       : body.receipt_format !== false;
 
+    const topK =
+      typeof body.top_k === "number" && Number.isFinite(body.top_k)
+        ? Math.min(100, Math.max(1, Math.floor(body.top_k)))
+        : 24;
+
     const url = `${getWaipBaseUrl()}/v1.1/skills/doc_completion/query`;
     const payload = {
       dataset_id: resolvedId,
@@ -69,10 +76,9 @@ export async function POST(req: Request) {
         model_name: body.model_name ?? "gpt-4",
         retrieval_chain: "custom",
         emb_type: "openai",
-        temperature: useReceiptFormat ? 0.25 : 0.2,
-        max_output_tokens:
-          body.max_output_tokens ??
-          (useReceiptFormat ? 2048 : 1024),
+        top_k: topK,
+        temperature: useReceiptFormat ? 0.28 : 0.22,
+        max_output_tokens: body.max_output_tokens ?? 4096,
         return_sources: body.return_sources ?? true,
       },
       stream_response: false,

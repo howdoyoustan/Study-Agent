@@ -1,5 +1,8 @@
 import { getWaipBaseUrl, waipHeaders } from "@/lib/waip";
 
+/** Large PDFs can take many minutes; extend serverless limit where the host allows. */
+export const maxDuration = 600;
+
 /**
  * Forwards multipart form data to WAIP ingest.
  * Use field name "files" for each uploaded file (or any keys — all file parts are forwarded).
@@ -8,6 +11,8 @@ export async function POST(
   req: Request,
   ctx: { params: Promise<{ id: string }> },
 ) {
+  const WAIP_INGEST_TIMEOUT_MS = 590_000;
+
   try {
     const { id } = await ctx.params;
     const incoming = await req.formData();
@@ -29,11 +34,32 @@ export async function POST(
     }
 
     const url = `${getWaipBaseUrl()}/v1.1/datasets/${id}/ingest`;
-    const res = await fetch(url, {
-      method: "POST",
-      headers: waipHeaders(),
-      body: out,
-    });
+    let res: Response;
+    try {
+      res = await fetch(url, {
+        method: "POST",
+        headers: waipHeaders(),
+        body: out,
+        signal: AbortSignal.timeout(WAIP_INGEST_TIMEOUT_MS),
+      });
+    } catch (e) {
+      const name = e instanceof Error ? e.name : "";
+      const message = e instanceof Error ? e.message : String(e);
+      if (name === "TimeoutError" || message.includes("timeout")) {
+        return Response.json(
+          {
+            error:
+              "Ingest timed out waiting for WAIP (very large PDF or slow network). Try one smaller file at a time, or retry. If upload succeeded on WAIP’s side, you may still run Prepare.",
+            code: "INGEST_TIMEOUT",
+          },
+          { status: 504 },
+        );
+      }
+      return Response.json(
+        { error: message || "Ingest failed before reaching WAIP.", code: "INGEST_FETCH_ERROR" },
+        { status: 502 },
+      );
+    }
 
     const text = await res.text();
     let data: unknown;
