@@ -37,6 +37,9 @@ Never commit `.env`; it is listed in `.gitignore`.
    | `WAIP_API_KEY` | Your WAIP bearer token |
    | `WAIP_API_ENDPOINT` | `https://api.waip.wiprocms.com` |
    | `WAIP_DATASET_ID` | Optional; defaults to the ID in `lib/constants.ts` if unset |
+   | `WAIP_MODEL_NAME` | Optional; default `gpt-5-chat` in code. Must be one of the models WAIP lists for your tenant. |
+
+   `max_output_tokens` is capped per model (WAIP enforces this—e.g. `gpt-4` up to **4096**).
 
    Do **not** set `NEXT_PUBLIC_*` for the API key—keep secrets server-side only.
 

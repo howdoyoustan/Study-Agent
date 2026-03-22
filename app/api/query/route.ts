@@ -1,4 +1,8 @@
-import { DEFAULT_WAIP_DATASET_ID } from "@/lib/constants";
+import {
+  DEFAULT_WAIP_DATASET_ID,
+  DEFAULT_WAIP_MODEL_NAME,
+  waipMaxOutputCapForModel,
+} from "@/lib/constants";
 import { envRaw, getWaipBaseUrl, waipHeaders } from "@/lib/waip";
 import { RAG_SYNTHESIS_GUIDANCE } from "@/lib/queryGuidance";
 import { THERMAL_RECEIPT_FORMAT_PROMPT } from "@/lib/thermalReceiptFormat";
@@ -69,16 +73,32 @@ export async function POST(req: Request) {
         ? Math.min(100, Math.max(1, Math.floor(body.top_k)))
         : 24;
 
+    const modelName =
+      (typeof body.model_name === "string" && body.model_name.trim()
+        ? body.model_name.trim()
+        : undefined) ??
+      envRaw("WAIP_MODEL_NAME") ??
+      DEFAULT_WAIP_MODEL_NAME;
+
+    const cap = waipMaxOutputCapForModel(modelName);
+    const requestedDefault = useReceiptFormat ? Math.min(8192, cap) : Math.min(6144, cap);
+    const requested =
+      typeof body.max_output_tokens === "number" &&
+      Number.isFinite(body.max_output_tokens)
+        ? Math.floor(body.max_output_tokens)
+        : requestedDefault;
+    const maxOutputTokens = Math.min(Math.max(1, requested), cap);
+
     const url = `${getWaipBaseUrl()}/v1.1/skills/doc_completion/query`;
     const payload = {
       dataset_id: resolvedId,
       skill_parameters: {
-        model_name: body.model_name ?? "gpt-4",
+        model_name: modelName,
         retrieval_chain: "custom",
         emb_type: "openai",
         top_k: topK,
         temperature: useReceiptFormat ? 0.28 : 0.22,
-        max_output_tokens: body.max_output_tokens ?? 4096,
+        max_output_tokens: maxOutputTokens,
         return_sources: body.return_sources ?? true,
       },
       stream_response: false,

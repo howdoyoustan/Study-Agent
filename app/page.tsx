@@ -3,7 +3,11 @@
 import { useCallback, useMemo, useState, type SyntheticEvent } from "react";
 import { DEFAULT_WAIP_DATASET_ID } from "@/lib/constants";
 import { extractDocCompletionContent } from "@/lib/waipResponse";
-import { thermalColumnWidth, wrapThermalText } from "@/lib/thermalWrap";
+import {
+  stripThermalLineLeadingSpaces,
+  thermalColumnWidth,
+  wrapThermalText,
+} from "@/lib/thermalWrap";
 
 function Section({
   title,
@@ -83,7 +87,8 @@ export default function Home() {
 
   const cols = thermalColumnWidth();
   const wrappedAnswer = useMemo(
-    () => wrapThermalText(lastAnswerText, cols),
+    () =>
+      wrapThermalText(stripThermalLineLeadingSpaces(lastAnswerText), cols),
     [lastAnswerText, cols],
   );
 

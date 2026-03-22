@@ -1,5 +1,14 @@
 const DEFAULT_WIDTH = 32;
 
+/** Removes leading spaces/tabs on each line so thermal width is not wasted on fake indents. */
+export function stripThermalLineLeadingSpaces(input: string): string {
+  if (!input) return "";
+  return input
+    .split(/\r?\n/)
+    .map((line) => line.replace(/^[ \t]+/, ""))
+    .join("\n");
+}
+
 /**
  * Hard-wraps text so no output line exceeds `width` characters.
  * Breaks at the last space in each chunk when possible; otherwise breaks mid-word.
