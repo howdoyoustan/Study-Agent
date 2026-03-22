@@ -1,7 +1,10 @@
 import { getWaipBaseUrl, waipHeaders } from "@/lib/waip";
 
-/** Large PDFs can take many minutes; extend serverless limit where the host allows. */
-export const maxDuration = 600;
+/**
+ * Vercel Hobby allows max 300s. Pro/Enterprise can raise this (e.g. 600) in code
+ * if your plan supports it: https://vercel.com/docs/functions/runtimes#max-duration
+ */
+export const maxDuration = 300;
 
 /**
  * Forwards multipart form data to WAIP ingest.
@@ -11,7 +14,8 @@ export async function POST(
   req: Request,
   ctx: { params: Promise<{ id: string }> },
 ) {
-  const WAIP_INGEST_TIMEOUT_MS = 590_000;
+  /** Slightly under maxDuration so we return 504 before the platform hard-kills. */
+  const WAIP_INGEST_TIMEOUT_MS = 295_000;
 
   try {
     const { id } = await ctx.params;

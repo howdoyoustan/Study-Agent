@@ -1,6 +1,7 @@
 import { getWaipBaseUrl, waipHeaders } from "@/lib/waip";
 
-export const maxDuration = 600;
+/** Vercel Hobby max is 300s; increase on Pro if needed. */
+export const maxDuration = 300;
 
 export async function POST(
   _req: Request,
