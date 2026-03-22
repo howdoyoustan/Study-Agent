@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+body {
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+@media print {
+  @page {
+    size: 58mm auto;
+    margin: 2mm;
+  }
+
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+}
