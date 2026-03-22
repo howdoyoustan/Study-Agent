@@ -3,11 +3,8 @@
 import { useCallback, useMemo, useState, type SyntheticEvent } from "react";
 import { DEFAULT_WAIP_DATASET_ID } from "@/lib/constants";
 import { extractDocCompletionContent } from "@/lib/waipResponse";
-import {
-  stripThermalLineLeadingSpaces,
-  thermalColumnWidth,
-  wrapThermalText,
-} from "@/lib/thermalWrap";
+import { THERMAL_PAPER_WIDTH_MM } from "@/lib/thermalReceiptFormat";
+import { prepareThermalReceiptDisplay } from "@/lib/thermalWrap";
 
 function Section({
   title,
@@ -85,17 +82,15 @@ export default function Home() {
     return t || DEFAULT_WAIP_DATASET_ID;
   }, [datasetId]);
 
-  const cols = thermalColumnWidth();
-  const wrappedAnswer = useMemo(
-    () =>
-      wrapThermalText(stripThermalLineLeadingSpaces(lastAnswerText), cols),
-    [lastAnswerText, cols],
+  const receiptAnswer = useMemo(
+    () => prepareThermalReceiptDisplay(lastAnswerText),
+    [lastAnswerText],
   );
 
   const printReceipt = useCallback(() => {
-    if (!wrappedAnswer.trim()) return;
+    if (!receiptAnswer.trim()) return;
     window.print();
-  }, [wrappedAnswer]);
+  }, [receiptAnswer]);
 
   const appendLog = useCallback((label: string, obj: unknown) => {
     setLog(
@@ -185,7 +180,7 @@ export default function Home() {
           </h1>
           <p className="max-w-lg text-sm leading-relaxed text-zinc-400">
             Ask questions in plain English. Answers come from your indexed PDF
-            library. Turn on receipt mode for a 57&nbsp;mm thermal layout, then
+            library. Turn on receipt mode for a fixed-width column layout, then
             print when you are ready.
           </p>
           <ol className="flex flex-col gap-2 text-left text-sm text-zinc-500 sm:flex-row sm:flex-wrap sm:gap-x-6">
@@ -226,7 +221,7 @@ export default function Home() {
                 Thermal receipt layout
               </span>
               <span className="mt-0.5 block text-xs text-zinc-500">
-                32-character column, dividers, and print-friendly wrapping.
+                {THERMAL_PAPER_WIDTH_MM}mm paper width; study-note structure; print-friendly.
               </span>
             </span>
           </label>
@@ -396,17 +391,17 @@ export default function Home() {
           className="mb-8 rounded-xl border border-zinc-800 bg-zinc-900/40 p-5 print:mb-0 print:rounded-none print:border-0 print:bg-white print:p-3 print:shadow-none"
         >
           <h2 className="mb-3 text-lg font-semibold tracking-tight text-zinc-50 print:hidden">
-            Answer ({cols}-column receipt, hard-wrapped)
+            Answer ({THERMAL_PAPER_WIDTH_MM}mm thermal)
           </h2>
           <p className="mb-2 text-sm text-zinc-500 print:hidden">
-            Text below is re-wrapped to exactly {cols} characters per line for
-            thermal printing. Use your browser print dialog (Ctrl+P); other UI
-            is hidden on print.
+            Shown at {THERMAL_PAPER_WIDTH_MM}mm width (typical receipt paper); the
+            model text is not re-wrapped to a fixed character count. Use print
+            (Ctrl+P); other UI is hidden on print.
           </p>
           <div className="mb-3 flex flex-wrap gap-2 print:hidden">
             <button
               type="button"
-              disabled={!wrappedAnswer.trim()}
+              disabled={!receiptAnswer.trim()}
               onClick={printReceipt}
               className="rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-zinc-900 shadow hover:bg-zinc-200 disabled:opacity-40"
             >
@@ -414,11 +409,14 @@ export default function Home() {
             </button>
           </div>
           <pre
-            className="max-h-[420px] overflow-auto rounded-lg border border-zinc-700 bg-black/60 p-3 font-mono text-[11px] leading-snug text-zinc-200 whitespace-pre-wrap print:max-h-none print:overflow-visible print:border-0 print:bg-white print:p-0 print:font-mono print:text-[10pt] print:leading-tight print:text-black"
-            style={{ maxWidth: `${cols}ch` }}
+            className="mx-auto max-h-[420px] overflow-auto rounded-lg border border-zinc-700 bg-black/60 p-3 font-mono text-[11px] leading-none text-zinc-200 whitespace-pre-wrap break-words print:max-h-none print:overflow-visible print:border-0 print:bg-white print:p-0 print:font-mono print:text-[10pt] print:leading-none print:text-black"
+            style={{
+              width: `${THERMAL_PAPER_WIDTH_MM}mm`,
+              maxWidth: "100%",
+            }}
           >
             {lastAnswerText
-              ? wrappedAnswer
+              ? receiptAnswer
               : "(No assistant text found in this response — see log.)"}
           </pre>
         </section>

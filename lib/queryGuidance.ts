@@ -1,3 +1,5 @@
+import { THERMAL_PAPER_WIDTH_MM } from "@/lib/thermalReceiptFormat";
+
 /**
  * How the model uses retrieved chunks and what shape the final answer should take.
  */
@@ -8,14 +10,15 @@ GROUNDING
 - Use several relevant passages when available: merge, compare, and qualify—do not rely on only the first or highest-ranked snippet.
 
 EXAM GOAL (10 MARKS — FULL MARKS AMBITION)
-- Write as if the question carries **10 marks**: you need **breadth** (all parts of the question addressed) and **depth** (each part explained properly—definitions, how/why, consequences, comparisons, exceptions where the sources allow).
-- The **opening body** (before any POINTS header) should be a **long, continuous essay-style** section: multiple ideas, each unfolded over several sentences and many wrapped lines—not a thin intro.
-- **POINTS** should reinforce structure with **dense, specific** items (clinical features, criteria, complications, classifications, management steps)—not sparse one-word bullets.
-- **CONCLUSION** should briefly **integrate** themes and show judgement (e.g. first-line vs second-line, when to choose what), still grounded in the passages.
-- If evidence is thin, say so in one short phrase, then give the fullest answer the passages allow—do not pad with guesses.
+- Write as if the question carries **10 marks**: **breadth** and **depth**—definitions, how/why, consequences, comparisons, exceptions where the sources allow.
+- **Shape:** dense thermal layout—plain numbered section lines (\`1. Title\`), then \`• Label: detail\` lines; **no** blank lines anywhere (single newline only between lines). **No** Markdown (\`*\`, \`**\`, \`-\` lists).
+- **Closing:** a short final paragraph that integrates themes and judgement (e.g. when to prefer what), still grounded in the passages—**no** heading line, just prose.
+- If evidence is thin, say so briefly, then give the fullest answer the passages allow—do not pad with guesses.
 
-OUTPUT RULES (WITH THERMAL FORMAT)
-- Do **not** include an interpretation preamble, an "ANSWER" heading, or any **sources / references / bibliography** section in the text you produce.
+OUTPUT RULES (WITH STUDY-NOTE / RECEIPT FORMAT)
+- Do **not** include interpretation preamble, "ANSWER", "POINTS", "CONCLUSION", or **sources / references** headings or sections.
+- Do **not** use \`==\`, \`--\`, or ruler lines of \`=\` / \`-\`.
+- Do **not** manually wrap text to a fixed character count; the app shows your answer in a **${THERMAL_PAPER_WIDTH_MM}mm**-wide thermal preview with normal wrapping.
 - Do not mention RAG, vectors, or "chunks".
 
 TONE
